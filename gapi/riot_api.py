@@ -1,6 +1,6 @@
 import requests
 
-class gapi:
+class RiotAPI:
 
     def __init__(self, api_key, region):
         self.api_key = api_key
