@@ -70,7 +70,7 @@ def event_parsing(event, data):
     return data
 
 
-def event_monitoring(response, last_event_id, data):
+def event_monitoring(crew:list, response, last_event_id, data):
     events = response['events']['Events']
 
     for event in events:
@@ -80,6 +80,17 @@ def event_monitoring(response, last_event_id, data):
         print("New event:", event["EventID"], event["EventName"])
 
         event_parsing(event, data)
+
+        #print(event)
+
+        if event['EventName'] == 'ChampionKill' and event['VictimName'] in crew:
+            print('A crew member has been slain')
+
+        if event['EventName'] == 'ChampionKill' and event['KillerName'] in crew:
+            print('A crew member has made a kill')
+
+        if event['EventName'] == 'ChampionKill' and any(assister in crew for assister in event['Assisters']):
+            print('A crew member has made a kill')
 
         last_event_id = event["EventID"]
 
