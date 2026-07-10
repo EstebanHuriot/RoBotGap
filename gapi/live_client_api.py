@@ -70,7 +70,7 @@ def event_parsing(event, data):
     return data
 
 
-def event_monitoring(crew:list, response, last_event_id, data):
+async def event_monitoring(crew:list, response, last_event_id, data, on_death=None):
     events = response['events']['Events']
 
     for event in events:
@@ -84,7 +84,7 @@ def event_monitoring(crew:list, response, last_event_id, data):
         #print(event)
 
         if event['EventName'] == 'ChampionKill' and event['VictimName'] in crew:
-            print('A crew member has been slain')
+            await on_death()
 
         if event['EventName'] == 'ChampionKill' and event['KillerName'] in crew:
             print('A crew member has made a kill')
