@@ -2,12 +2,12 @@ from pathlib import Path
 import discord
 import credentials as cr
 
+
 bot = discord.Client(intents=discord.Intents.all())
 
 DEATH_SOUND = Path(__file__).parent / "sounds" / "death.mp3"
 
 
-@bot.event
 async def play_death_sound(guild_id:int, voice_channel_id:int):
     
     guild = bot.get_guild(guild_id) # server
@@ -36,6 +36,8 @@ async def play_death_sound(guild_id:int, voice_channel_id:int):
         source,
         after=lambda error: print(f"Erreur audio : {error}") if error else None,
     )
+
+
 
 
 @bot.event
