@@ -3,6 +3,9 @@ import pandas as pd
 import time
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+from bot.audio import play_death_sound
+import credentials as cr
+import discord
 
 class LiveClientAPI:
 
@@ -34,6 +37,8 @@ class LiveClientAPI:
         return data
     
 
+
+
     def event_monitoring(response, last_event_id):
         events = response['events']['Events']
     
@@ -46,13 +51,6 @@ class LiveClientAPI:
             last_event_id = event["EventID"]
     
         return last_event_id
-    
-
-def death_check(response): # might be useless
-    check = response['allPlayers'][0]['isDead']
-
-    if check == True:
-        return print('dead')
 
 
 def event_parsing(event, data):
@@ -70,7 +68,7 @@ def event_parsing(event, data):
     return data
 
 
-async def event_monitoring(crew:list, response, last_event_id, data, on_death=None):
+async def event_monitoring(crew:list, response, last_event_id, data, bot:discord.Client):
     events = response['events']['Events']
 
     for event in events:
@@ -81,16 +79,19 @@ async def event_monitoring(crew:list, response, last_event_id, data, on_death=No
 
         event_parsing(event, data)
 
-        #print(event)
+        if event["EventName"] == "ChampionKill":
+            victim = event.get("VictimName")
+            killer = event.get("KillerName")
+            assisters = event.get("Assisters", [])
 
-        if event['EventName'] == 'ChampionKill' and event['VictimName'] in crew:
-            await on_death()
+            if victim in crew:
+                await play_death_sound(bot, cr.guild_id, cr.voc_channel_id)
 
-        if event['EventName'] == 'ChampionKill' and event['KillerName'] in crew:
-            print('A crew member has made a kill')
+            if killer in crew:
+                print("A crew member has made a kill")
 
-        if event['EventName'] == 'ChampionKill' and any(assister in crew for assister in event['Assisters']):
-            print('A crew member has made a kill')
+            if any(assister in crew for assister in assisters):
+                print("A crew member has made an assist")
 
         last_event_id = event["EventID"]
 
