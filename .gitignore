@@ -2,4 +2,4 @@ credentials.py
 __pycache__/
 .venv
 ffmpeg.exe
-.mp3
+*.mp3
