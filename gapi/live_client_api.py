@@ -3,7 +3,7 @@ import pandas as pd
 import time
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-from bot.audio import play_death_sound
+
 import credentials as cr
 import discord
 

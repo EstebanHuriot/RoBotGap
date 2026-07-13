@@ -2,7 +2,7 @@ import asyncio
 import discord
 
 import credentials as cr
-from bot.audio import play_death_sound
+from bot.audio import play_sound, connect_to_vc
 from gapi.live_client_api import LiveClientAPI
 from gapi.live_events import event_monitoring
 
@@ -64,10 +64,25 @@ async def monitoring_loop():
                 break
             
 
-            last_event_id, data, p = await event_monitoring(crew=crew,response=response ,last_event_id=last_event_id ,data=data,)   
+            last_event_id, data, game_start, k, d, a = await event_monitoring(crew=crew,response=response ,last_event_id=last_event_id ,data=data)   
 
-            if p is True:
-                await play_death_sound(bot=bot, guild_id=cr.guild_id, voice_channel_id=cr.voc_channel_id)
+            # connects the bot to the vocal if the game has started
+            if game_start:
+                await connect_to_vc(bot=bot, guild_id=cr.guild_id, voice_channel_id=cr.voc_channel_id)
+
+
+
+            # crew member kills
+            if k is True:
+                await play_sound(bot=bot, guild_id=cr.guild_id, voice_channel_id=cr.voc_channel_id, sound_event="kill")
+
+            # crew member dies
+            if d is True:
+                await play_sound(bot=bot, guild_id=cr.guild_id, voice_channel_id=cr.voc_channel_id, sound_event="death")
+
+            # crew member assists
+            if a is True:
+                await play_sound(bot=bot, guild_id=cr.guild_id, voice_channel_id=cr.voc_channel_id, sound_event="assist")
 
 
         except Exception as error:
