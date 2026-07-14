@@ -44,14 +44,27 @@ async def on_message(message: discord.Message):
         author = message.author
         await author.send('I know what you are hiding')
 
+    # monitoring the situation
     if message.content.lower() == '!monitoring':
         
         if monitoring_task is None or monitoring_task.done():
             monitoring_task = asyncio.create_task(monitoring_loop())
+            await message.channel.send("I am now monitoring the situation")
             
         else:
-            await message.channel.send("Le monitoring est déjà actif.")
+            await message.channel.send("Already monitoring the situation")
+
+    if message.content.lower() == '!monitoring stop':
+
+        if monitoring_task is not None and not monitoring_task.done():
+            monitoring_task.cancel()
         
+            monitoring_task = None
+
+            await message.channel.send("Monitoring stopped.")
+        else:
+            await message.channel.send("Monitoring is not active.")
+
 
 
 
