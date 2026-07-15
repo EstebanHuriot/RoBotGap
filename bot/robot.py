@@ -84,17 +84,24 @@ async def monitoring_loop():
 
     while True:
         try:
-            response = LiveClientAPI().get_live_data()
-            if "ok" in response :
+            response = LiveClientAPI().get_live_data_check()
+            if response["ok"] is False :
+                
                 print(response)
-                # break
+
+                # need to clear last_event_id and data in between games or the bot will start monitoring from n+1 event in this game
+                # (n = number of events during the previous games) 
+                # didn't work directly in event_monitoring() because the API could still send some data after the reset
+                last_event_id = -1
+                data.clear()
+
                 await asyncio.sleep(5)
                 continue
 
-            last_event_id, data, game_start, k, d, a = await event_monitoring(crew=crew,response=response ,last_event_id=last_event_id ,data=data)   
+            last_event_id, data, in_game, k, d, a = await event_monitoring(crew=crew,response=response['data'] ,last_event_id=last_event_id ,data=data)   
 
             # connects the bot to the vocal if the game has started
-            if game_start:
+            if in_game:
                 await connect_to_vc(bot=bot, guild_id=cr.guild_id, voice_channel_id=cr.voc_channel_id)
 
             # crew member kills
@@ -112,6 +119,7 @@ async def monitoring_loop():
 
         except Exception as error:
             print("Erreur pendant le monitoring :", error)
+
 
         await asyncio.sleep(1)
 
