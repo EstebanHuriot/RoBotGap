@@ -27,12 +27,4 @@ class LiveClientAPI:
             return {"ok": False, "error": "local_api_unavailable", "message": "Live Client Data API unavailable. The player is probably not in game."}
 
 
-    def get_live_data(self):
-        response = self.get_live_data_check()
-
-        if response["ok"] == False:
-            return response
-        
-        data = response["data"]
-        return data
     
