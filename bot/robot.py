@@ -5,9 +5,13 @@ import credentials as cr
 from bot.audio import play_sound, connect_to_vc
 from gapi.live_client_api import LiveClientAPI
 from gapi.live_events import event_monitoring
+from bot.crew import Crew, CrewMember
 
 # Global ATM, will change it later on
-crew = [cr.game_name]
+me = CrewMember(cr.game_name, cr.tag_line)
+crew = Crew()
+crew.add(me)
+
 data = []
 last_event_id = -1
 monitoring_task = None
@@ -66,6 +70,67 @@ async def on_message(message: discord.Message):
             await message.channel.send("Monitoring is not active.")
 
 
+    # add a player to the crew
+    if message.content.lower().startswith('!crew add'):
+        
+        try:
+            content = message.content.strip()
+            command, action, riot_id = content.split(maxsplit=2)
+            pseudo, tagline = riot_id.split("#", maxsplit=1)
+
+            player = CrewMember(pseudo, tagline)
+            added = crew.add(player)
+
+            if added:
+                await message.channel.send(f"{player.full} added")
+            
+            else:
+                await message.channel.send(f"{player.full} is already in the crew")
+
+
+        except:
+            await message.channel.send(f"Could not add")
+
+
+    # remove a player from the crew
+    if message.content.lower().startswith('!crew remove'):
+        
+        try:
+            content = message.content.strip()
+            command, action, riot_id = content.split(maxsplit=2)
+            pseudo, tagline = riot_id.split("#", maxsplit=1)
+
+            player = CrewMember(pseudo, tagline)
+            removed = crew.remove(player)
+
+            if removed:
+                await message.channel.send(f"{player.full} removed")
+            
+            else:
+                await message.channel.send(f"{player.full} was not in the crew")
+
+
+        except:
+            await message.channel.send(f"Bro had to stay")
+
+    # show crew members
+    if message.content.lower().strip() == '!crew show':
+        await message.channel.send(crew.show())
+
+    
+    # find if a certain player is in the crew
+    if message.content.lower().startswith('!crew find'):
+        
+        try:
+            content = message.content.strip()
+            command, action, riot_id = content.split(maxsplit=2)
+            pseudo, tagline = riot_id.split("#", maxsplit=1)
+
+            player = CrewMember(pseudo, tagline)
+            await message.channel.send(crew.find(player))
+
+        except:
+            await message.channel.send(f"Where is bro")
 
 
 
