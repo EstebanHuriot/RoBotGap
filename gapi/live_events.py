@@ -1,3 +1,5 @@
+from bot.crew import Crew, CrewMember
+
 def event_parsing(event, data):
     event_name = event['EventName']
     assisters = event.get('Assisters', [])
@@ -13,15 +15,15 @@ def event_parsing(event, data):
     return data
 
 
-async def event_monitoring(crew:list, response, last_event_id, data):
+async def event_monitoring(crew:Crew, response, last_event_id, data):
     in_game = False
     player_killed = False 
     player_died = False
     player_assisted = False
-    
+    crew_names = crew.show()
     
     events = response['events']['Events']
-
+    
     for event in events:
         if event['EventID'] <= last_event_id:
             continue
@@ -39,7 +41,7 @@ async def event_monitoring(crew:list, response, last_event_id, data):
         if event['EventName'] == "GameEnd":
             in_game = False
             data.clear()
-            print("GameEnd enregistré avec ID :", last_event_id)
+            #print("GameEnd enregistré avec ID :", last_event_id) # a bit too much on a regular but saved me when I needed
             break
             
 
@@ -49,15 +51,15 @@ async def event_monitoring(crew:list, response, last_event_id, data):
             killer = event.get("KillerName")
             assisters = event.get("Assisters", [])
 
-            if victim in crew:
+            if victim in crew_names:
                 print('Player dead')
                 player_died = True
 
-            if killer in crew:
+            if killer in crew_names:
                 print("A crew member has made a kill")
                 player_killed = True
 
-            if any(assister in crew for assister in assisters):
+            if any(assister in crew_names for assister in assisters):
                 print("A crew member has made an assist")
                 player_assisted = True
 
