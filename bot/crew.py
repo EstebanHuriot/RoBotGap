@@ -35,18 +35,16 @@ class Crew:
             return False
 
     def remove(self, crewmember:CrewMember):
-        y = crewmember.full
+        
+        for index, member in enumerate(self.crewMembers):
+            if member.full == crewmember.full:
+                self.crewMembers.pop(index)
+                print(f"Ciao {member.pseudo}")
+                return True
 
-        x = [member.full for member in self.crewMembers]
+        print('Crew member not found')
+        return False
 
-        if y in x:
-            self.crewMembers.remove(crewmember)
-            print(f"Ciao: {crewmember.pseudo}")
-            return True
-
-        else:
-            print('Crew member not found')
-            return False
 
     def reset(self):
         self.crewMembers.clear()
