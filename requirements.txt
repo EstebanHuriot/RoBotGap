@@ -3,3 +3,4 @@ pandas
 urllib3
 discord.py
 discord.py[voice]
+yt-dlp
