@@ -6,14 +6,14 @@ from bot.audio import play_sound, connect_to_vc
 from gapi.live_client_api import LiveClientAPI
 from gapi.live_events import event_monitoring
 from bot.crew import Crew, CrewMember
+from bot.monitoring import MonitoringState
 
 # Global ATM, will change it later on
 me = CrewMember(cr.game_name, cr.tag_line)
 crew = Crew()
 crew.add(me)
 
-data = []
-last_event_id = -1
+monitoring_state = MonitoringState()
 monitoring_task = None
 
 bot = discord.Client(intents=discord.Intents.all()) # gives all permissions to the bot
@@ -144,8 +144,6 @@ async def monitoring_loop():
     await bot.wait_until_ready()
 
     print('bot ready')
-    
-    global last_event_id, data
 
     while True:
         try:
@@ -157,16 +155,26 @@ async def monitoring_loop():
                 # need to clear last_event_id and data in between games or the bot will start monitoring from n+1 event in this game
                 # (n = number of events during the previous games) 
                 # didn't work directly in event_monitoring() because the API could still send some data after the reset
-                last_event_id = -1
-                data.clear()
+                # also if the reset is too early, the api will still be sending data, and the bot will not behave like wanted 
+                monitoring_state.reset()
+                
 
                 await asyncio.sleep(5)
                 continue
 
-            last_event_id, data, in_game, k, d, a = await event_monitoring(crew=crew,response=response['data'] ,last_event_id=last_event_id ,data=data)   
+            monitoring_state.last_event_id, monitoring_state.events, game_started, game_ended, k, d, a = await event_monitoring(crew=crew,response=response['data'] ,last_event_id=monitoring_state.last_event_id ,data=monitoring_state.events)   
+
+
+            if game_started:
+                monitoring_state.start_game()
+
+            if game_ended:
+                monitoring_state.end_game()
+
+
 
             # connects the bot to the vocal if the game has started
-            if in_game:
+            if monitoring_state.in_game :
                 await connect_to_vc(bot=bot, guild_id=cr.guild_id, voice_channel_id=cr.voc_channel_id)
 
             # crew member kills
