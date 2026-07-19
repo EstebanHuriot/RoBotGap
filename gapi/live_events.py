@@ -16,7 +16,8 @@ def event_parsing(event, data):
 
 
 async def event_monitoring(crew:Crew, response, last_event_id, data):
-    in_game = False
+    game_started = False
+    game_ended = False
     player_killed = False 
     player_died = False
     player_assisted = False
@@ -35,17 +36,13 @@ async def event_monitoring(crew:Crew, response, last_event_id, data):
         last_event_id = event["EventID"] # event is considered done
 
         if event["EventName"] == "GameStart":
-            in_game = True
+            game_started = True
             
         
         if event['EventName'] == "GameEnd":
-            in_game = False
-            data.clear()
-            #print("GameEnd enregistré avec ID :", last_event_id) # a bit too much on a regular but saved me when I needed
-            break
+            game_ended = True
+ 
             
-
-
         if event["EventName"] == "ChampionKill":
             victim = event.get("VictimName")
             killer = event.get("KillerName")
@@ -64,4 +61,4 @@ async def event_monitoring(crew:Crew, response, last_event_id, data):
                 player_assisted = True
 
     print("event_monitoring retourne :", last_event_id)
-    return last_event_id, data, in_game, player_killed, player_died, player_assisted
+    return last_event_id, data, game_started, game_ended, player_killed, player_died, player_assisted
